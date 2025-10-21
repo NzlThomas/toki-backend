@@ -36,10 +36,33 @@ async function sendMessage(senderId, receiverId, message) {
   });
 }
 
+async function getConversation(connectedUserId, receiverId) {
+  return prisma.message.findMany({
+    where: {
+      OR: [
+        { senderId: connectedUserId, receiverId: receiverId },
+        { senderId: receiverId, receiverId: connectedUserId },
+      ],
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+    include: {
+      sender: {
+        select: { username: true },
+      },
+      receiver: {
+        select: { username: true },
+      },
+    },
+  });
+}
+
 module.exports = {
   findUserByEmail,
   findUserById,
   createUser,
   updateProfile,
   sendMessage,
+  getConversation,
 };

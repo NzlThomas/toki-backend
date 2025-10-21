@@ -23,6 +23,26 @@ async function postMessage(req, res) {
   }
 }
 
+async function getConversation(req, res) {
+  try {
+    const connectedUser = req.userId;
+    const receiverId = Number(req.params.id);
+
+    const receiver = await db.findUserById(receiverId);
+
+    if (!receiver) {
+      return res.status(404).json({ error: "User does not exist" });
+    }
+
+    const conversation = await db.getConversation(connectedUser, receiverId);
+
+    res.status(200).json({ conversation });
+  } catch (error) {
+    res.status(500).json({ error: "Couldn't fetch conversation" });
+  }
+}
+
 module.exports = {
   postMessage,
+  getConversation,
 };

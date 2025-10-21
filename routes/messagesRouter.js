@@ -17,5 +17,10 @@ messagesRouter.post(
   verifyToken,
   messageController.postMessage
 );
+messagesRouter.get(
+  "/messages/:id",
+  verifyToken,
+  messageController.getConversation
+);
 
 module.exports = messagesRouter;
