@@ -5,5 +5,10 @@ const verifyToken = require("../middlewares/authMiddleware");
 
 messagesRouter.post("/register", userController.postRegister);
 messagesRouter.post("/login", userController.postLogin);
+messagesRouter.put(
+  "/user-details/:id",
+  verifyToken,
+  userController.putProfileDetails
+);
 
 module.exports = messagesRouter;

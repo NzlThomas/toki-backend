@@ -49,7 +49,30 @@ async function postLogin(req, res) {
   }
 }
 
+async function putProfileDetails(req, res) {
+  try {
+    const userId = req.userId;
+    const requestedId = Number(req.params.id);
+
+    const { username, picture, bio } = req.body;
+
+    const user = await db.findUserById(requestedId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    if (userId !== requestedId) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+    await db.updateProfile(requestedId, username, picture, bio);
+    res.status(200).json({ message: "Successfully updated profile" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update profile" });
+  }
+}
+
 module.exports = {
   postRegister,
   postLogin,
+  putProfileDetails,
 };
