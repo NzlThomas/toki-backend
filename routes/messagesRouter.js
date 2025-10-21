@@ -22,5 +22,11 @@ messagesRouter.get(
   verifyToken,
   messageController.getConversation
 );
+messagesRouter.put("/message/:id", verifyToken, messageController.putMessage);
+messagesRouter.delete(
+  "/message/:id",
+  verifyToken,
+  messageController.deleteMessage
+);
 
 module.exports = messagesRouter;

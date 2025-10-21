@@ -42,7 +42,55 @@ async function getConversation(req, res) {
   }
 }
 
+async function putMessage(req, res) {
+  try {
+    const connectedUser = req.userId;
+    const messageId = Number(req.params.id);
+
+    const { newText } = req.body;
+
+    const message = await db.findMessage(messageId);
+
+    if (!message) {
+      return res.status(404).json({ error: "Message does not exist" });
+    }
+
+    if (message.senderId !== connectedUser) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const updatedMessage = await db.updateMessage(messageId, newText);
+    res.status(200).json({ updatedMessage });
+  } catch (error) {
+    res.status(500).json({ error: "Couldn't update message" });
+  }
+}
+
+async function deleteMessage(req, res) {
+  try {
+    const connectedUser = req.userId;
+    const messageId = Number(req.params.id);
+
+    const message = await db.findMessage(messageId);
+
+    if (!message) {
+      return res.status(404).json({ error: "Message does not exist" });
+    }
+
+    if (message.senderId !== connectedUser) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const deletedMessage = await db.deleteMessage(messageId);
+    res.status(200).json({ deletedMessage });
+  } catch (error) {
+    res.status(500).json({ error: "Couldn't delete message" });
+  }
+}
+
 module.exports = {
   postMessage,
   getConversation,
+  putMessage,
+  deleteMessage,
 };

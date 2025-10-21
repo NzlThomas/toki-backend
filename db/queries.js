@@ -58,6 +58,26 @@ async function getConversation(connectedUserId, receiverId) {
   });
 }
 
+async function findMessage(messageId) {
+  return prisma.message.findUnique({
+    where: { id: messageId },
+    select: { senderId: true },
+  });
+}
+
+async function updateMessage(messageId, newText) {
+  return prisma.message.update({
+    where: { id: messageId },
+    data: { text: newText },
+  });
+}
+
+async function deleteMessage(messageId) {
+  return prisma.message.delete({
+    where: { id: messageId },
+  });
+}
+
 module.exports = {
   findUserByEmail,
   findUserById,
@@ -65,4 +85,7 @@ module.exports = {
   updateProfile,
   sendMessage,
   getConversation,
+  findMessage,
+  updateMessage,
+  deleteMessage,
 };
