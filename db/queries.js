@@ -12,6 +12,13 @@ async function findUserById(id) {
   });
 }
 
+async function findReceiverById(id) {
+  return prisma.user.findUnique({
+    where: { id },
+    select: { username: true, picture: true, bio: true },
+  });
+}
+
 async function createUser(username, email, hashedPassword, bio, picture) {
   return prisma.user.create({
     data: { username, email, password: hashedPassword, bio, picture },
@@ -34,6 +41,9 @@ async function updateProfile(requestedId, username, picture, bio) {
 async function sendMessage(senderId, receiverId, message) {
   return prisma.message.create({
     data: { senderId, receiverId, text: message },
+    include: {
+      sender: { select: { id: true, username: true, picture: true } },
+    },
   });
 }
 
@@ -89,4 +99,5 @@ module.exports = {
   findMessage,
   updateMessage,
   deleteMessage,
+  findReceiverById,
 };

@@ -21,6 +21,16 @@ async function getUserData(req, res) {
   }
 }
 
+async function getReceiverName(req, res) {
+  const receiverId = Number(req.params.id);
+  try {
+    const receiverInfos = await db.findReceiverById(receiverId);
+    res.status(200).json(receiverInfos);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to get user data" });
+  }
+}
+
 async function postRegister(req, res) {
   try {
     const { username, email, password, bio, picture } = req.body;
@@ -98,4 +108,5 @@ module.exports = {
   postLogin,
   putProfileDetails,
   getUserData,
+  getReceiverName,
 };

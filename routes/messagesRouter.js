@@ -12,6 +12,7 @@ messagesRouter.put(
   verifyToken,
   userController.putProfileDetails
 );
+messagesRouter.get("/user/:id", verifyToken, userController.getReceiverName);
 
 messagesRouter.post(
   "/messages/:id",
