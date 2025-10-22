@@ -61,6 +61,9 @@ async function postLogin(req, res) {
       user: {
         id: user.id,
         username: user.username,
+        email: user.email,
+        bio: user.bio,
+        picture: user.picture,
       },
     });
   } catch (error) {
