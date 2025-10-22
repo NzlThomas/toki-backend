@@ -2,6 +2,25 @@ const bcrypt = require("bcryptjs");
 const db = require("../db/queries");
 const jwt = require("jsonwebtoken");
 
+async function getUserData(req, res) {
+  const loggedUserId = req.userId;
+  const requestedUserId = Number(req.params.id);
+  try {
+    if (loggedUserId !== requestedUserId) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+    const userData = await db.findUserById(requestedUserId);
+
+    if (!userData) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json(userData);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to get user data" });
+  }
+}
+
 async function postRegister(req, res) {
   try {
     const { username, email, password, bio, picture } = req.body;
@@ -75,4 +94,5 @@ module.exports = {
   postRegister,
   postLogin,
   putProfileDetails,
+  getUserData,
 };
