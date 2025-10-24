@@ -35,13 +35,20 @@ async function createUser(username, email, hashedPassword, bio, picture) {
 async function updateProfile(requestedId, username, picture, bio) {
   const userData = {};
 
-  if (username) userData.username = username;
+  if (username !== undefined && username.trim() !== "") {
+    userData.username = username.trim();
+  }
   if (picture) userData.picture = picture;
-  if (bio) userData.bio = bio;
+  if (bio !== undefined) userData.bio = bio;
 
   return prisma.user.update({
     where: { id: requestedId },
     data: userData,
+    select: {
+      username: true,
+      bio: true,
+      picture: true,
+    },
   });
 }
 

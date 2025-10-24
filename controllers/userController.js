@@ -106,8 +106,13 @@ async function putProfileDetails(req, res) {
     if (userId !== requestedId) {
       return res.status(403).json({ error: "Unauthorized" });
     }
-    await db.updateProfile(requestedId, username, picture, bio);
-    res.status(200).json({ message: "Successfully updated profile" });
+    const updatedInfos = await db.updateProfile(
+      requestedId,
+      username,
+      picture,
+      bio
+    );
+    res.status(200).json({ updatedInfos });
   } catch (error) {
     res.status(500).json({ error: "Failed to update profile" });
   }
