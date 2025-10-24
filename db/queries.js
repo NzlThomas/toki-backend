@@ -21,7 +21,7 @@ async function findReceiverById(id) {
 
 async function findUserByName(name) {
   return prisma.user.findMany({
-    where: { username: { contains: name } },
+    where: { username: { contains: name, mode: "insensitive" } },
     select: { id: true, username: true, bio: true, picture: true },
   });
 }
