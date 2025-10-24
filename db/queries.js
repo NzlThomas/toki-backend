@@ -19,6 +19,13 @@ async function findReceiverById(id) {
   });
 }
 
+async function findUserByName(name) {
+  return prisma.user.findMany({
+    where: { username: { contains: name } },
+    select: { id: true, username: true, bio: true, picture: true },
+  });
+}
+
 async function createUser(username, email, hashedPassword, bio, picture) {
   return prisma.user.create({
     data: { username, email, password: hashedPassword, bio, picture },
@@ -100,4 +107,5 @@ module.exports = {
   updateMessage,
   deleteMessage,
   findReceiverById,
+  findUserByName,
 };
