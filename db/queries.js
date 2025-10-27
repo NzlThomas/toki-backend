@@ -52,6 +52,13 @@ async function updateProfile(requestedId, username, picture, bio) {
   });
 }
 
+async function uploadProfilePicture(userId, path) {
+  return prisma.user.update({
+    where: { id: userId },
+    data: { picture: path },
+  });
+}
+
 async function sendMessage(senderId, receiverId, message) {
   return prisma.message.create({
     data: { senderId, receiverId, text: message },
@@ -115,4 +122,5 @@ module.exports = {
   deleteMessage,
   findReceiverById,
   findUserByName,
+  uploadProfilePicture,
 };

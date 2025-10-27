@@ -20,4 +20,21 @@ function verifyToken(req, res, next) {
   }
 }
 
-module.exports = verifyToken;
+function verifyUserAuthorization(req, res, next) {
+  try {
+    const userId = req.userId;
+    const requestedId = Number(req.params.id);
+
+    if (userId !== requestedId) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+    next();
+  } catch (error) {
+    res.status(403).json({ error: "Authorization failed" });
+  }
+}
+
+module.exports = {
+  verifyToken,
+  verifyUserAuthorization,
+};
