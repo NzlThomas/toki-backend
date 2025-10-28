@@ -56,6 +56,7 @@ async function uploadProfilePicture(userId, path) {
   return prisma.user.update({
     where: { id: userId },
     data: { picture: path },
+    select: { picture: true },
   });
 }
 

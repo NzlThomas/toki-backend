@@ -142,7 +142,6 @@ async function updateProfilePicture(req, res) {
 
     try {
       await fs.unlink(req.file.path);
-      console.log("Fichier original supprimé avec succès");
     } catch (err) {
       console.warn(
         "Impossible de supprimer le fichier original :",
