@@ -91,6 +91,22 @@ async function getConversation(connectedUserId, receiverId) {
   });
 }
 
+async function getUserConversations(userId) {
+  return await prisma.message.findMany({
+    where: {
+      OR: [{ senderId: userId }, { receiverId: userId }],
+    },
+    select: {
+      sender: {
+        select: { id: true, username: true, picture: true },
+      },
+      receiver: {
+        select: { id: true, username: true, picture: true },
+      },
+    },
+  });
+}
+
 async function findMessage(messageId) {
   return prisma.message.findUnique({
     where: { id: messageId },
@@ -124,4 +140,5 @@ module.exports = {
   findReceiverById,
   findUserByName,
   uploadProfilePicture,
+  getUserConversations,
 };
