@@ -46,6 +46,12 @@ messagesRouter.get(
   verifyToken,
   messageController.getConversation
 );
+messagesRouter.get(
+  "/conversations",
+  verifyToken,
+  userController.getUserConversations
+);
+
 messagesRouter.put("/message/:id", verifyToken, messageController.putMessage);
 messagesRouter.delete(
   "/message/:id",

@@ -159,6 +159,28 @@ async function updateProfilePicture(req, res) {
   }
 }
 
+async function getUserConversations(req, res) {
+  try {
+    const userId = req.userId;
+
+    const messages = await db.getUserConversations(userId);
+
+    const uniqueUsers = new Map();
+    for (const msg of messages) {
+      if (msg.sender.id !== userId) uniqueUsers.set(msg.sender.id, msg.sender);
+      if (msg.receiver.id !== userId)
+        uniqueUsers.set(msg.receiver.id, msg.receiver);
+    }
+
+    const userConversations = [...uniqueUsers.values()];
+
+    res.status(200).json(userConversations);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+}
+
 module.exports = {
   postRegister,
   postLogin,
@@ -167,4 +189,5 @@ module.exports = {
   getReceiverName,
   getUserByName,
   updateProfilePicture,
+  getUserConversations,
 };
