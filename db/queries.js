@@ -98,10 +98,10 @@ async function getUserConversations(userId) {
     },
     select: {
       sender: {
-        select: { id: true, username: true, picture: true },
+        select: { id: true, username: true, picture: true, bio: true },
       },
       receiver: {
-        select: { id: true, username: true, picture: true },
+        select: { id: true, username: true, picture: true, bio: true },
       },
     },
   });
