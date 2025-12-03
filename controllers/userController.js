@@ -42,7 +42,13 @@ async function getUserByName(req, res) {
 
 async function postRegister(req, res) {
   try {
-    const { username, email, password, bio, picture } = req.body;
+    const { username, email, password, confirmPassword, bio, picture } =
+      req.body;
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({ error: "Passwords do not match" });
+    }
+
     const existingUser = await db.findUserByEmail(email);
 
     if (existingUser) {
