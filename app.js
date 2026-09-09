@@ -1,15 +1,21 @@
-require("dotenv").config();
-const cors = require("cors");
-const path = require("path");
+import "dotenv/config";
+import cors from "cors";
+import path from "path";
 
-const express = require("express");
+import express from "express";
 const app = express();
 
-const blogRouter = require("./routes/messagesRouter");
+import blogRouter from "./routes/messagesRouter.js";
 
-const PORT = process.env.EXPRESS_PORT;
+const PORT = process.env.EXPRESS_PORT || 3000;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    credentials: true,
+  }),
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use("/uploads", express.static(path.resolve("uploads")));

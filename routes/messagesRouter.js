@@ -1,12 +1,10 @@
-const { Router } = require("express");
+import { Router } from "express";
 const messagesRouter = Router();
-const { upload } = require("../middlewares/multerConfig.js");
-const userController = require("../controllers/userController");
-const messageController = require("../controllers/messageController");
-const {
-  verifyToken,
-  verifyUserAuthorization,
-} = require("../middlewares/authMiddleware");
+import { upload } from "../middlewares/multerConfig.js";
+import userController from "../controllers/userController.js";
+import messageController from "../controllers/messageController.js";
+import authMiddleware from "../middlewares/authMiddleware.js";
+const { verifyToken, verifyUserAuthorization } = authMiddleware;
 
 messagesRouter.post("/register", userController.postRegister);
 messagesRouter.post("/login", userController.postLogin);
@@ -14,49 +12,49 @@ messagesRouter.get(
   "/users/:id",
   verifyToken,
   verifyUserAuthorization,
-  userController.getUserData
+  userController.getUserData,
 );
 messagesRouter.put(
   "/user-details/:id",
   verifyToken,
   verifyUserAuthorization,
-  userController.putProfileDetails
+  userController.putProfileDetails,
 );
 messagesRouter.put(
   "/profile-picture/:id",
   verifyToken,
   verifyUserAuthorization,
   upload.single("picture"),
-  userController.updateProfilePicture
+  userController.updateProfilePicture,
 );
 messagesRouter.get("/user/:id", verifyToken, userController.getReceiverName);
 messagesRouter.get(
   "/search/users/:name",
   verifyToken,
-  userController.getUserByName
+  userController.getUserByName,
 );
 
 messagesRouter.post(
   "/messages/:id",
   verifyToken,
-  messageController.postMessage
+  messageController.postMessage,
 );
 messagesRouter.get(
   "/messages/:id",
   verifyToken,
-  messageController.getConversation
+  messageController.getConversation,
 );
 messagesRouter.get(
   "/conversations",
   verifyToken,
-  userController.getUserConversations
+  userController.getUserConversations,
 );
 
 messagesRouter.put("/message/:id", verifyToken, messageController.putMessage);
 messagesRouter.delete(
   "/message/:id",
   verifyToken,
-  messageController.deleteMessage
+  messageController.deleteMessage,
 );
 
-module.exports = messagesRouter;
+export default messagesRouter;

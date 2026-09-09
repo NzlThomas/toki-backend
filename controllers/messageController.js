@@ -1,4 +1,4 @@
-const db = require("../db/queries");
+import db from "../db/queries.js";
 
 async function postMessage(req, res) {
   try {
@@ -88,7 +88,7 @@ async function deleteMessage(req, res) {
   }
 }
 
-module.exports = {
+export default {
   postMessage,
   getConversation,
   putMessage,

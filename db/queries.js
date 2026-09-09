@@ -1,4 +1,4 @@
-const prisma = require("./prismaClient");
+import { prisma } from "../lib/prisma.js";
 
 async function findUserByEmail(email) {
   return prisma.user.findUnique({
@@ -127,7 +127,7 @@ async function deleteMessage(messageId) {
   });
 }
 
-module.exports = {
+export default {
   findUserByEmail,
   findUserById,
   createUser,

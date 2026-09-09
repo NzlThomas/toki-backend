@@ -1,9 +1,9 @@
-const bcrypt = require("bcryptjs");
-const db = require("../db/queries");
-const jwt = require("jsonwebtoken");
-const sharp = require("sharp");
-const path = require("path");
-const fs = require("fs/promises");
+import bcrypt from "bcryptjs";
+import db from "../db/queries.js";
+import jwt from "jsonwebtoken";
+import sharp from "sharp";
+import path from "path";
+import fs from "node:fs/promises";
 
 async function getUserData(req, res) {
   const requestedUserId = Number(req.params.id);
@@ -112,7 +112,7 @@ async function putProfileDetails(req, res) {
       requestedId,
       username,
       picture,
-      bio
+      bio,
     );
     res.status(200).json({ updatedInfos });
   } catch (error) {
@@ -129,6 +129,16 @@ async function updateProfilePicture(req, res) {
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
+    }
+
+    if (user.picture && user.picture !== "/uploads/default.webp") {
+      const oldImagePath = path.resolve(`.${user.picture}`);
+
+      try {
+        await fs.unlink(oldImagePath);
+      } catch (err) {
+        console.warn("Impossible de supprimer l'ancienne photo :", err.message);
+      }
     }
 
     if (!req.file) return res.status(400).json({ error: "Aucun fichier reçu" });
@@ -151,7 +161,7 @@ async function updateProfilePicture(req, res) {
     } catch (err) {
       console.warn(
         "Impossible de supprimer le fichier original :",
-        err.message
+        err.message,
       );
     }
 
@@ -187,7 +197,7 @@ async function getUserConversations(req, res) {
   }
 }
 
-module.exports = {
+export default {
   postRegister,
   postLogin,
   putProfileDetails,
