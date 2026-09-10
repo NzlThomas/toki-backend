@@ -5,18 +5,19 @@ import sharp from "sharp";
 import path from "path";
 import fs from "node:fs/promises";
 
-async function getUserData(req, res) {
-  const requestedUserId = Number(req.params.id);
+async function getProfile(req, res) {
   try {
-    const userData = await db.findUserById(requestedUserId);
+    const userId = req.userId;
 
-    if (!userData) {
+    const user = await db.findUserById(userId);
+
+    if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    res.status(200).json(userData);
+    res.status(200).json({ user });
   } catch (error) {
-    res.status(500).json({ error: "Failed to get user data" });
+    res.status(500).json({ error: "Failed to retrieve user infos" });
   }
 }
 
@@ -63,6 +64,13 @@ async function postRegister(req, res) {
   }
 }
 
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  maxAge: 24 * 60 * 60 * 1000,
+};
+
 async function postLogin(req, res) {
   try {
     const { email, password } = req.body;
@@ -79,20 +87,34 @@ async function postLogin(req, res) {
     }
 
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "24h",
     });
-    res.status(200).json({
-      token,
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        bio: user.bio,
-        picture: user.picture,
-      },
-    });
+
+    res
+      .cookie("token", token, cookieOptions)
+      .status(200)
+      .json({
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          bio: user.bio,
+          picture: user.picture,
+        },
+      });
   } catch (error) {
     res.status(500).json({ error: "Authentication failed" });
+  }
+}
+
+async function postLogout(req, res) {
+  try {
+    res
+      .clearCookie("token", cookieOptions)
+      .status(200)
+      .json({ message: "Logged out successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Logout failed" });
   }
 }
 
@@ -200,8 +222,9 @@ async function getUserConversations(req, res) {
 export default {
   postRegister,
   postLogin,
+  postLogout,
   putProfileDetails,
-  getUserData,
+  getProfile,
   getReceiverName,
   getUserByName,
   updateProfilePicture,

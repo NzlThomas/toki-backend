@@ -8,7 +8,7 @@ async function findUserByEmail(email) {
 async function findUserById(id) {
   return prisma.user.findUnique({
     where: { id },
-    select: { id: true, username: true, email: true, picture: true, bio: true },
+    select: { id: true, username: true, picture: true, bio: true },
   });
 }
 
