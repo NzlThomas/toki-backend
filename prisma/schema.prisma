@@ -19,6 +19,7 @@ model User {
   email String @unique
   password String
   picture String? @default("/uploads/default.webp")
+  picturePublicId String?
   bio String?
   messagesSent    Message[] @relation("SentMessages")
   messagesReceived Message[] @relation("ReceivedMessages")

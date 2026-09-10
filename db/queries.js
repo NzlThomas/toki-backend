@@ -32,13 +32,12 @@ async function createUser(username, email, hashedPassword, bio, picture) {
   });
 }
 
-async function updateProfile(requestedId, username, picture, bio) {
+async function updateProfile(requestedId, username, bio) {
   const userData = {};
 
   if (username !== undefined && username.trim() !== "") {
     userData.username = username.trim();
   }
-  if (picture) userData.picture = picture;
   if (bio !== undefined) userData.bio = bio;
 
   return prisma.user.update({
@@ -52,10 +51,10 @@ async function updateProfile(requestedId, username, picture, bio) {
   });
 }
 
-async function uploadProfilePicture(userId, path) {
+async function uploadProfilePicture(userId, picture, picturePublicId) {
   return prisma.user.update({
     where: { id: userId },
-    data: { picture: path },
+    data: { picture, picturePublicId },
     select: { picture: true },
   });
 }
@@ -95,6 +94,9 @@ async function getUserConversations(userId) {
   return await prisma.message.findMany({
     where: {
       OR: [{ senderId: userId }, { receiverId: userId }],
+    },
+    orderBy: {
+      createdAt: "desc",
     },
     select: {
       sender: {
