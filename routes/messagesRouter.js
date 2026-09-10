@@ -8,12 +8,10 @@ const { verifyToken, verifyUserAuthorization } = authMiddleware;
 
 messagesRouter.post("/register", userController.postRegister);
 messagesRouter.post("/login", userController.postLogin);
-messagesRouter.get(
-  "/users/:id",
-  verifyToken,
-  verifyUserAuthorization,
-  userController.getUserData,
-);
+messagesRouter.post("/logout", userController.postLogout);
+
+messagesRouter.get("/profile", verifyToken, userController.getProfile);
+
 messagesRouter.put(
   "/user-details/:id",
   verifyToken,
@@ -27,6 +25,7 @@ messagesRouter.put(
   upload.single("picture"),
   userController.updateProfilePicture,
 );
+
 messagesRouter.get("/user/:id", verifyToken, userController.getReceiverName);
 messagesRouter.get(
   "/search/users/:name",

@@ -1,4 +1,5 @@
 import "dotenv/config";
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
 
@@ -16,6 +17,7 @@ app.use(
   }),
 );
 
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use("/uploads", express.static(path.resolve("uploads")));
@@ -26,5 +28,5 @@ app.listen(PORT, (error) => {
   if (error) {
     throw error;
   }
-  console.log(`Server is listening on http://localhost:${PORT}`);
+  console.log(`Server is listening on ${PORT}`);
 });
