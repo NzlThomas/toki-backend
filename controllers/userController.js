@@ -1,3 +1,4 @@
+import cloudinary from "../lib/cloudinary.js";
 import bcrypt from "bcryptjs";
 import db from "../db/queries.js";
 import jwt from "jsonwebtoken";
@@ -122,7 +123,7 @@ async function putProfileDetails(req, res) {
   try {
     const requestedId = Number(req.params.id);
 
-    const { username, picture, bio } = req.body;
+    const { username, bio } = req.body;
 
     const user = await db.findUserById(requestedId);
 
@@ -130,12 +131,7 @@ async function putProfileDetails(req, res) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    const updatedInfos = await db.updateProfile(
-      requestedId,
-      username,
-      picture,
-      bio,
-    );
+    const updatedInfos = await db.updateProfile(requestedId, username, bio);
     res.status(200).json({ updatedInfos });
   } catch (error) {
     res.status(500).json({ error: "Failed to update profile" });
@@ -153,21 +149,15 @@ async function updateProfilePicture(req, res) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    if (user.picture && user.picture !== "/uploads/default.webp") {
-      const oldImagePath = path.resolve(`.${user.picture}`);
+    if (!req.file) return res.status(400).json({ error: "Aucun fichier reçu" });
 
+    if (user.picturePublicId) {
       try {
-        await fs.unlink(oldImagePath);
+        await cloudinary.uploader.destroy(user.picturePublicId);
       } catch (err) {
         console.warn("Impossible de supprimer l'ancienne photo :", err.message);
       }
     }
-
-    if (!req.file) return res.status(400).json({ error: "Aucun fichier reçu" });
-
-    const outputDir = path.resolve("uploads");
-    const resizedFilename = `user-${userId}-${Date.now()}.webp`;
-    const outputPath = path.join(outputDir, resizedFilename);
 
     const originalImageBuffer = await fs.readFile(req.file.path);
 
@@ -176,7 +166,15 @@ async function updateProfilePicture(req, res) {
       .toFormat("webp", { quality: 85 })
       .toBuffer();
 
-    await fs.writeFile(outputPath, processedImage);
+    const uploadResult = await cloudinary.uploader.upload(
+      `data:image/webp;base64,${processedImage.toString("base64")}`,
+      {
+        folder: "profile-pictures",
+        public_id: `user-${userId}`,
+        overwrite: true,
+        resource_type: "image",
+      },
+    );
 
     try {
       await fs.unlink(req.file.path);
@@ -187,8 +185,11 @@ async function updateProfilePicture(req, res) {
       );
     }
 
-    const pathString = `/uploads/${resizedFilename}`;
-    const updatedUser = await db.uploadProfilePicture(userId, pathString);
+    const updatedUser = await db.uploadProfilePicture(
+      userId,
+      uploadResult.secure_url,
+      uploadResult.public_id,
+    );
 
     res.json({ message: "Photo mise à jour", updatedUser });
   } catch (error) {
