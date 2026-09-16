@@ -17,6 +17,9 @@ messagesRouter.post(
   userController.resendVerificationEmail,
 );
 
+messagesRouter.post("/forgot-password", userController.forgotPassword);
+messagesRouter.post("/reset-password", userController.resetPassword);
+
 messagesRouter.get("/profile", verifyToken, userController.getProfile);
 
 messagesRouter.put(
