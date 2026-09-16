@@ -1,6 +1,9 @@
 import cloudinary from "../lib/cloudinary.js";
 import crypto from "node:crypto";
-import { sendVerificationEmail } from "../lib/resend.js";
+import {
+  sendVerificationEmail,
+  sendResetPasswordEmail,
+} from "../lib/resend.js";
 import bcrypt from "bcryptjs";
 import db from "../db/queries.js";
 import jwt from "jsonwebtoken";
@@ -47,6 +50,17 @@ async function postRegister(req, res) {
   try {
     const { username, email, password, confirmPassword, bio, picture } =
       req.body;
+
+    if (
+      typeof password !== "string" ||
+      typeof confirmPassword !== "string" ||
+      !password.trim() ||
+      !confirmPassword.trim()
+    ) {
+      return res.status(400).json({
+        error: "Missing form fields",
+      });
+    }
 
     if (password !== confirmPassword) {
       return res.status(400).json({ error: "Passwords do not match" });
@@ -147,6 +161,102 @@ async function resendVerificationEmail(req, res) {
 
     return res.status(500).json({
       error: "Failed to send verification email",
+    });
+  }
+}
+
+async function forgotPassword(req, res) {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        error: "No email provided",
+      });
+    }
+
+    const user = await db.findUserByEmail(email);
+
+    if (!user) {
+      return res.status(200).json({
+        message: "If an account exists, a reset email has been sent",
+      });
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+    await db.deletePasswordTokensByUserId(user.id);
+    await db.createPasswordResetToken(token, user.id, expiresAt);
+
+    await sendResetPasswordEmail(user.email, token);
+
+    return res.status(200).json({
+      message: "If an account exists, a reset email has been sent",
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      error: "Failed to send reset password email",
+    });
+  }
+}
+
+async function resetPassword(req, res) {
+  try {
+    const { token } = req.query;
+    const { password, confirmPassword } = req.body;
+
+    if (
+      typeof password !== "string" ||
+      typeof confirmPassword !== "string" ||
+      !password.trim() ||
+      !confirmPassword.trim()
+    ) {
+      return res.status(400).json({
+        error: "Missing form fields",
+      });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({ error: "Passwords do not match" });
+    }
+
+    if (!token) {
+      return res.status(400).json({
+        error: "No token provided",
+      });
+    }
+
+    const passwordResetToken = await db.findPasswordToken(token);
+
+    if (!passwordResetToken) {
+      return res
+        .status(400)
+        .json({ error: "NO_TOKEN", message: "Couldn't find token" });
+    }
+
+    if (passwordResetToken.expiresAt < new Date()) {
+      return res
+        .status(400)
+        .json({ error: "EXPIRED_TOKEN", message: "Expired token" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await db.putPassword(passwordResetToken.userId, hashedPassword);
+
+    await db.deletePasswordToken(token);
+
+    return res.status(200).json({
+      message: "Changed password successfully",
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      error: "Failed to reset password",
     });
   }
 }
@@ -313,6 +423,8 @@ export default {
   postLogout,
   verifyEmailToken,
   resendVerificationEmail,
+  forgotPassword,
+  resetPassword,
   putProfileDetails,
   getProfile,
   getReceiverName,

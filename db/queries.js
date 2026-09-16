@@ -49,10 +49,34 @@ async function createEmailVerificationToken(token, userId, expiresAt) {
   });
 }
 
+async function createPasswordResetToken(token, userId, expiresAt) {
+  return prisma.passwordResetToken.create({
+    data: {
+      token,
+      userId,
+      expiresAt,
+    },
+  });
+}
+
 async function findToken(token) {
   return prisma.emailVerificationToken.findUnique({
     where: { token },
     select: { expiresAt: true, userId: true },
+  });
+}
+
+async function findPasswordToken(token) {
+  return prisma.passwordResetToken.findUnique({
+    where: { token },
+    select: { expiresAt: true, userId: true },
+  });
+}
+
+async function putPassword(userId, hashedPassword) {
+  return prisma.user.update({
+    where: { id: userId },
+    data: { password: hashedPassword },
   });
 }
 
@@ -69,8 +93,20 @@ async function deleteEmailVerificationToken(token) {
   });
 }
 
+async function deletePasswordToken(token) {
+  return prisma.passwordResetToken.delete({
+    where: { token },
+  });
+}
+
 async function deleteEmailVerificationTokensByUserId(userId) {
   return prisma.emailVerificationToken.deleteMany({
+    where: { userId },
+  });
+}
+
+async function deletePasswordTokensByUserId(userId) {
+  return prisma.passwordResetToken.deleteMany({
     where: { userId },
   });
 }
@@ -177,9 +213,14 @@ export default {
   findUserById,
   createUser,
   createEmailVerificationToken,
+  createPasswordResetToken,
   findToken,
+  findPasswordToken,
   verifyEmail,
   deleteEmailVerificationToken,
+  deletePasswordToken,
+  deletePasswordTokensByUserId,
+  putPassword,
   deleteEmailVerificationTokensByUserId,
   updateProfile,
   sendMessage,

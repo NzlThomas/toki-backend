@@ -27,12 +27,22 @@ model User {
   messagesReceived Message[] @relation("ReceivedMessages")
   
   emailVerificationTokens EmailVerificationToken[]
+  passwordResetTokens PasswordResetToken[]
 }
 
 model EmailVerificationToken {
   id        Int      @id @default(autoincrement())
   token     String   @unique
   userId    Int
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  token String @unique
+  userId Int
   expiresAt DateTime
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
