@@ -1,9 +1,10 @@
 import cloudinary from "../lib/cloudinary.js";
+import crypto from "node:crypto";
+import { sendVerificationEmail } from "../lib/resend.js";
 import bcrypt from "bcryptjs";
 import db from "../db/queries.js";
 import jwt from "jsonwebtoken";
 import sharp from "sharp";
-import path from "path";
 import fs from "node:fs/promises";
 
 async function getProfile(req, res) {
@@ -58,10 +59,95 @@ async function postRegister(req, res) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    await db.createUser(username, email, hashedPassword, bio, picture);
+    const user = await db.createUser(
+      username,
+      email,
+      hashedPassword,
+      bio,
+      picture,
+    );
+
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+    await db.createEmailVerificationToken(token, user.id, expiresAt);
+
+    await sendVerificationEmail(user.email, token);
+
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-    res.status(500).json({ error: "Registration failed" });
+    if (!res.headeresSent) {
+      return res.status(500).json({
+        error: "Registration failed",
+      });
+    }
+  }
+}
+
+async function verifyEmailToken(req, res) {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.status(400).json({ error: "No token provided" });
+    }
+
+    const verificationToken = await db.findToken(token);
+
+    if (!verificationToken) {
+      return res
+        .status(400)
+        .json({ error: "NO_TOKEN", message: "Couldn't find token" });
+    }
+
+    if (verificationToken.expiresAt < new Date()) {
+      return res
+        .status(400)
+        .json({ error: "EXPIRED_TOKEN", message: "Expired token" });
+    }
+
+    await db.verifyEmail(verificationToken.userId);
+    await db.deleteEmailVerificationToken(token);
+
+    return res.status(200).json({ message: "Verified email successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to verify token" });
+  }
+}
+
+async function resendVerificationEmail(req, res) {
+  try {
+    const user = await db.findUserById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({
+        error: "User not found",
+      });
+    }
+
+    if (user.emailVerified) {
+      return res.status(400).json({
+        error: "Email already verified",
+      });
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+    await db.deleteEmailVerificationTokensByUserId(user.id);
+    await db.createEmailVerificationToken(token, user.id, expiresAt);
+
+    await sendVerificationEmail(user.email, token);
+
+    return res.status(200).json({
+      message: "Verification email sent",
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      error: "Failed to send verification email",
+    });
   }
 }
 
@@ -101,6 +187,7 @@ async function postLogin(req, res) {
           username: user.username,
           bio: user.bio,
           picture: user.picture,
+          emailVerified: user.emailVerified,
         },
       });
   } catch (error) {
@@ -224,6 +311,8 @@ export default {
   postRegister,
   postLogin,
   postLogout,
+  verifyEmailToken,
+  resendVerificationEmail,
   putProfileDetails,
   getProfile,
   getReceiverName,

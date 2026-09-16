@@ -8,7 +8,14 @@ async function findUserByEmail(email) {
 async function findUserById(id) {
   return prisma.user.findUnique({
     where: { id },
-    select: { id: true, username: true, picture: true, bio: true },
+    select: {
+      id: true,
+      username: true,
+      picture: true,
+      bio: true,
+      emailVerified: true,
+      email: true,
+    },
   });
 }
 
@@ -29,6 +36,42 @@ async function findUserByName(name) {
 async function createUser(username, email, hashedPassword, bio, picture) {
   return prisma.user.create({
     data: { username, email, password: hashedPassword, bio, picture },
+  });
+}
+
+async function createEmailVerificationToken(token, userId, expiresAt) {
+  return prisma.emailVerificationToken.create({
+    data: {
+      token,
+      userId,
+      expiresAt,
+    },
+  });
+}
+
+async function findToken(token) {
+  return prisma.emailVerificationToken.findUnique({
+    where: { token },
+    select: { expiresAt: true, userId: true },
+  });
+}
+
+async function verifyEmail(userId) {
+  return prisma.user.update({
+    where: { id: userId },
+    data: { emailVerified: true },
+  });
+}
+
+async function deleteEmailVerificationToken(token) {
+  return prisma.emailVerificationToken.delete({
+    where: { token },
+  });
+}
+
+async function deleteEmailVerificationTokensByUserId(userId) {
+  return prisma.emailVerificationToken.deleteMany({
+    where: { userId },
   });
 }
 
@@ -133,6 +176,11 @@ export default {
   findUserByEmail,
   findUserById,
   createUser,
+  createEmailVerificationToken,
+  findToken,
+  verifyEmail,
+  deleteEmailVerificationToken,
+  deleteEmailVerificationTokensByUserId,
   updateProfile,
   sendMessage,
   getConversation,

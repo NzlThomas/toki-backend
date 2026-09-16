@@ -17,12 +17,25 @@ model User {
   id Int @id @default(autoincrement())
   username String
   email String @unique
+  emailVerified Boolean @default(false)
   password String
   picture String? @default("/uploads/default.webp")
   picturePublicId String?
   bio String?
+
   messagesSent    Message[] @relation("SentMessages")
   messagesReceived Message[] @relation("ReceivedMessages")
+  
+  emailVerificationTokens EmailVerificationToken[]
+}
+
+model EmailVerificationToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Message {

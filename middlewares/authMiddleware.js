@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import db from "../db/queries.js";
 
 function verifyToken(req, res, next) {
   const token = req.cookies.token;
@@ -13,6 +14,26 @@ function verifyToken(req, res, next) {
     next();
   } catch (error) {
     return res.status(401).json({ error: "Invalid token" });
+  }
+}
+
+async function verifyEmail(req, res, next) {
+  try {
+    const user = await db.findUserById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (!user.emailVerified) {
+      return res.status(403).json({ error: "Email not verified" });
+    }
+    next();
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      error: "Server error",
+    });
   }
 }
 
@@ -32,5 +53,6 @@ function verifyUserAuthorization(req, res, next) {
 
 export default {
   verifyToken,
+  verifyEmail,
   verifyUserAuthorization,
 };
