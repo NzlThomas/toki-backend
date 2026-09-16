@@ -3,6 +3,7 @@
 Toki est une application de messagerie instantanée au design minimaliste proposant les fonctionnalités suivantes :
 
 - Création de compte
+- Vérification d'email
 - Ajout d'une photo de profil
 - Changement de nom d'utilisateur et bio
 - Recherche d'utilisateurs par pseudo
