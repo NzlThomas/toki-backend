@@ -70,6 +70,7 @@ NODE_ENV= Facultatif si le projet tourne en local
 CLOUDINARY_CLOUD_NAME= Facultatif (voir note)
 CLOUDINARY_API_KEY= Facultatif (voir note)
 CLOUDINARY_API_SECRET= Facultatif (voir note)
+RESEND_API_KEY= Facultatif (voir note)
 ```
 
 _Le projet est configuré pour que les photos de profil soient stockées sur Cloudinary et ne supporte donc pas l'ajout de photos de profil sur un dossier local (sauf si vous modifiez le code)._
