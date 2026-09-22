@@ -1,4 +1,6 @@
 import db from "../db/queries.js";
+import { getIO } from "../sockets/socket.js";
+import { updateUi, updateDeletedMessage } from "../sockets/socketHandler.js";
 
 async function postMessage(req, res) {
   try {
@@ -16,7 +18,12 @@ async function postMessage(req, res) {
       return res.status(400).json({ error: "Message cannot be empty" });
     }
 
+    const io = getIO();
+
     const newMessage = await db.sendMessage(senderId, receiverId, message);
+
+    updateUi(io, receiverId, newMessage);
+
     res.status(201).json({ message: "Message sent successfully", newMessage });
   } catch (error) {
     res.status(500).json({ error: "Couldn't send message" });
@@ -82,6 +89,10 @@ async function deleteMessage(req, res) {
     }
 
     const deletedMessage = await db.deleteMessage(messageId);
+
+    const io = getIO();
+
+    updateDeletedMessage(io, message.receiverId, deletedMessage);
     res.status(200).json({ deletedMessage });
   } catch (error) {
     res.status(500).json({ error: "Couldn't delete message" });

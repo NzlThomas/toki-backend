@@ -9,7 +9,7 @@ Toki est une application de messagerie instantanée au design minimaliste propos
 - Changement de nom d'utilisateur et bio
 - Recherche d'utilisateurs par pseudo
 - Conversations privées avec d'autres utilisateurs
-- Suppression de messages
+- Mise à jour des conversations en temps réel (ajout et suppression)
 
 ![Aperçu de l'application](./assets/preview.png)
 
@@ -39,6 +39,7 @@ Toki est une application de messagerie instantanée au design minimaliste propos
 - Sharp
 - JWT
 - Cloudinary
+- Socket.io
 
 ## Installation
 

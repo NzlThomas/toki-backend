@@ -191,7 +191,7 @@ async function getUserConversations(userId) {
 async function findMessage(messageId) {
   return prisma.message.findUnique({
     where: { id: messageId },
-    select: { senderId: true },
+    select: { id: true, senderId: true, receiverId: true },
   });
 }
 
@@ -205,6 +205,7 @@ async function updateMessage(messageId, newText) {
 async function deleteMessage(messageId) {
   return prisma.message.delete({
     where: { id: messageId },
+    select: { id: true, receiverId: true },
   });
 }
 

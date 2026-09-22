@@ -2,13 +2,26 @@ import "dotenv/config";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
-
+import { createServer } from "http";
+import { initSocket } from "./sockets/socket.js";
 import express from "express";
+import { socketHandler } from "./sockets/socketHandler.js";
+import authMiddleware from "./middlewares/authMiddleware.js";
+const { socketAuthMiddleware } = authMiddleware;
+
 const app = express();
+const server = createServer(app);
+const io = initSocket(server);
 
 import blogRouter from "./routes/messagesRouter.js";
 
 const PORT = process.env.EXPRESS_PORT || 3000;
+
+io.use(socketAuthMiddleware);
+
+io.on("connection", (socket) => {
+  socketHandler(socket);
+});
 
 app.use(
   cors({
@@ -24,7 +37,7 @@ app.use("/uploads", express.static(path.resolve("uploads")));
 
 app.use("/", blogRouter);
 
-app.listen(PORT, (error) => {
+server.listen(PORT, (error) => {
   if (error) {
     throw error;
   }
