@@ -19,7 +19,7 @@ model User {
   email String @unique
   emailVerified Boolean @default(false)
   password String
-  picture String? @default("/uploads/default.webp")
+  picture String? @default("/assets/default.webp")
   picturePublicId String?
   bio String?
 
