@@ -51,8 +51,35 @@ function verifyUserAuthorization(req, res, next) {
   }
 }
 
+function socketAuthMiddleware(socket, next) {
+  try {
+    const cookies = socket.handshake.headers.cookie
+      ?.split("; ")
+      .reduce((acc, cookie) => {
+        const [key, value] = cookie.split("=");
+        acc[key] = value;
+        return acc;
+      }, {});
+
+    const token = cookies?.token;
+
+    if (!token) {
+      return next(new Error("No token provided"));
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    socket.userId = decoded.userId;
+
+    next();
+  } catch (error) {
+    next(new Error("Invalid token"));
+  }
+}
+
 export default {
   verifyToken,
   verifyEmail,
   verifyUserAuthorization,
+  socketAuthMiddleware,
 };
