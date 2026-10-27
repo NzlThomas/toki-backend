@@ -1,6 +1,9 @@
 {
   "name": "messages-backend",
   "version": "1.0.0",
+  "engines": {
+    "node": "22.23.4"
+  },
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -13,7 +16,7 @@
   "description": "",
   "dependencies": {
     "@prisma/adapter-pg": "7.2.0",
-    "@prisma/client": "7.2.0",
+    "@prisma/client": "^7.10.1",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.11.0",
     "cookie-parser": "^1.4.7",
@@ -24,10 +27,10 @@
     "multer": "^2.0.2",
     "pg": "^8.23.0",
     "resend": "^6.27.0",
-    "sharp": "^0.34.4",
+    "sharp": "^0.35.5",
     "socket.io": "^4.8.3"
   },
   "devDependencies": {
-    "prisma": "7.2.0"
+    "prisma": "^7.10.1"
   }
 }
